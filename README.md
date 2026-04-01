@@ -32,7 +32,7 @@ The following table summarizes the test-set performance of all evaluated models,
 
 *(Note: CV Mean represents the 5-fold cross-validation accuracy on the training set. Overfit is the difference between CV Mean and Test Accuracy. Brier Score measures probabilistic calibration, where closer to 0 is better).*
 
-## 🧮 Mathematical Framework
+## Mathematical Framework
 
 The classification task is grounded in Bayesian decision theory, aiming to accurately model the posterior probability of class C_k given the input feature vector x:
 
