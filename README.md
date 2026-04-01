@@ -34,15 +34,15 @@ The following table summarizes the test-set performance of all evaluated models,
 
 ## Mathematical Framework
 
-The classification task is grounded in Bayesian decision theory, aiming to accurately model the posterior probability of class C_k given the input feature vector x:
+The classification task is grounded in Bayesian decision theory, aiming to accurately model the posterior probability of class $\mathcal{C}_k$ given the input feature vector $\mathbf{x}$:
 
-p(C_k | x) = [p(x | C_k) * p(C_k)] / p(x)
+$$p(\mathcal{C}_k \mid \mathbf{x}) = \frac{p(\mathbf{x} \mid \mathcal{C}_k)\, p(\mathcal{C}_k)}{p(\mathbf{x})}$$
 
 Statistical significance between the top models is assessed using **McNemar's test** on paired nominal data, utilizing the standard chi-squared statistic:
 
-chi^2 = (|b - c| - 1)^2 / (b + c)
+$$\chi^2 = \frac{(|b - c| - 1)^2}{b + c}$$
 
-*(Where b and c represent the discordant error pairs between two classifiers).*
+*(Where $b$ and $c$ represent the discordant error pairs between two classifiers).*
 
 ## Project Structure
 
