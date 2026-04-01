@@ -42,7 +42,7 @@ Statistical significance between the top models is assessed using **McNemar's te
 
 $$\chi^2 = \frac{(|b - c| - 1)^2}{b + c}$$
 
-*(Where $b$ and $c$ represent the discordant error pairs between two classifiers).*
+*(Where b and c represent the discordant error pairs between two classifiers).*
 
 ## Project Structure
 
