@@ -1,12 +1,10 @@
-# Digit Recognition Research Package
-# Based on Bishop (2006) and Goodfellow et al. (2016)
+# src package
 
 from src.data_loader import load_data, split_data, dataset_summary
 from src.models import (
     build_baseline_pipeline,
     build_candidate_models,
-    tune_svm,
-    tune_mlp,
+    tune_svm, tune_mlp,
     build_ensemble,
 )
 from src.evaluate import (
