@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import logging
 
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score,
@@ -10,8 +9,6 @@ from sklearn.metrics import (
 )
 from sklearn.model_selection import cross_val_score, learning_curve
 from sklearn.calibration import calibration_curve
-
-log = logging.getLogger(__name__)
 
 sns.set_theme(style="whitegrid", context="notebook", rc={"figure.dpi": 150})
 
@@ -54,7 +51,7 @@ def comparative_evaluation(models, X_train, y_train, X_test, y_test, cv=5):
     """Train each model, evaluate on test set, and run cross-validation."""
     rows = []
     for name, pipe in models.items():
-        log.info(f"  {name} ...")
+        print(f"  Training {name}...")
         pipe.fit(X_train, y_train)
         row = evaluate_model(pipe, X_test, y_test, model_name=name)
 

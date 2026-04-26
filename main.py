@@ -1,12 +1,12 @@
 import os
-import time
 import argparse
 import warnings
-import logging
 import numpy as np
 import pandas as pd
 import matplotlib
-matplotlib.use("Agg")  # non-interactive backend for pipeline runs
+
+# Use non-interactive backend
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from src.data_loader import load_data, split_data, dataset_summary
@@ -29,68 +29,56 @@ from src.evaluate import (
 
 warnings.filterwarnings("ignore")
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    datefmt="%H:%M:%S",
-)
-log = logging.getLogger(__name__)
-
-
 def main(no_tune=False):
     os.makedirs("results", exist_ok=True)
     np.random.seed(42)
 
-    # --- load & split --------------------------------------------------------
-    log.info("Loading data...")
+    print("Loading data...")
     X, y, images, feat_names = load_data()
-    log.info(f"Loaded {X.shape[0]} samples, {X.shape[1]} features")
+    print(f"Loaded {X.shape[0]} samples, {X.shape[1]} features")
 
     X_train, X_val, X_test, y_train, y_val, y_test = split_data(X, y)
-    # merge train+val for final training (val was only used during development)
+    
+    # Merge train and val since we'll use CV or just train on everything before testing
     X_tv = np.vstack([X_train, X_val])
     y_tv = np.concatenate([y_train, y_val])
     labels = [str(d) for d in range(10)]
 
-    # --- baseline (PCA + SVM) ------------------------------------------------
-    log.info("Fitting baseline (PCA + RBF-SVM)...")
+    print("Fitting baseline model (PCA + RBF-SVM)...")
     baseline = build_baseline_pipeline()
     baseline.fit(X_tv, y_tv)
-    log.info(f"Baseline test accuracy: {baseline.score(X_test, y_test):.4f}")
+    print(f"Baseline test accuracy: {baseline.score(X_test, y_test):.4f}")
 
-    # --- comparative eval of all candidates ----------------------------------
-    log.info("Training and evaluating candidate models...")
+    print("Training and evaluating candidate models...")
     models = build_candidate_models()
     results = comparative_evaluation(models, X_tv, y_tv, X_test, y_test)
-    log.info(f"Results:\n{results.to_string()}")
+    print(f"Results:\n{results.to_string()}")
 
     save_results_csv(results, "results/metrics_summary.csv")
     plot_model_comparison(results, "accuracy", "results/comparison.png")
 
-    # --- optional hyperparameter tuning --------------------------------------
-    svm_tuned = mlp_tuned = None
+    svm_tuned = None
+    mlp_tuned = None
+    
     if not no_tune:
-        log.info("Running SVM grid search (this may take a while)...")
+        print("Running SVM grid search (this might take a bit)...")
         svm_tuned = tune_svm(X_tv, y_tv).best_estimator_
-        log.info("Running MLP randomized search...")
+        print("Running MLP randomized search...")
         mlp_tuned = tune_mlp(X_tv, y_tv).best_estimator_
 
-    # --- ensemble ------------------------------------------------------------
-    log.info("Building soft-voting ensemble...")
+    print("Building soft-voting ensemble...")
     ensemble = build_ensemble(svm_tuned, mlp_tuned)
     ensemble.fit(X_tv, y_tv)
-    log.info(f"Ensemble test accuracy: {ensemble.score(X_test, y_test):.4f}")
+    print(f"Ensemble test accuracy: {ensemble.score(X_test, y_test):.4f}")
 
-    # --- McNemar's test: best single model vs ensemble -----------------------
     best_name = results.iloc[0]["model"]
     y_pred_best = models[best_name].predict(X_test)
     y_pred_ens = ensemble.predict(X_test)
 
     mcn = mcnemar_test(y_test, y_pred_best, y_pred_ens, best_name, "Ensemble")
-    log.info(f"McNemar: {mcn['summary']}")
+    print(f"McNemar: {mcn['summary']}")
 
-    # --- plots ---------------------------------------------------------------
-    log.info("Generating plots...")
+    print("Generating plots...")
     plot_confusion_matrix(ensemble, X_test, y_test, labels,
                           "Ensemble", "results/ensemble_cm.png")
     plot_learning_curves(ensemble, X_tv, y_tv,
@@ -101,7 +89,7 @@ def main(no_tune=False):
     plot_calibration_curves(proba_models, X_test, y_test,
                             save_path="results/calibration.png")
 
-    log.info("Done. Results saved to results/")
+    print("Done. Results saved to results/")
 
 
 if __name__ == "__main__":
